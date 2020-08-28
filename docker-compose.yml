@@ -1,0 +1,23 @@
+version: '3.8'
+services:
+  app:
+    build:
+      # context can/may/will be different per-project setup
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        - user={user_name}
+        - personal_access_token=personal_access_token
+    ports:
+      - "8090:8090"
+    command: "./main"
+  swagger:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./pb/:/api
+    environment:
+      SWAGGER_JSON: /api/hello.swagger.json
+      BASE_URL: /swagger
