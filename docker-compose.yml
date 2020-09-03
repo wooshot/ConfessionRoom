@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   app:
     build:
@@ -19,5 +19,6 @@ services:
     volumes:
       - ./pb/:/api
     environment:
-      SWAGGER_JSON: /api/hello.swagger.json
+      SWAGGER_JSON: /api/confession.swagger.json
       BASE_URL: /swagger
+      API_URL: http://app:8090

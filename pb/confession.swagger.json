@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "pb/hello.proto",
+    "title": "pb/confession.proto",
     "version": "version not set"
   },
   "schemes": [
@@ -15,33 +15,25 @@
     "application/json"
   ],
   "paths": {
-    "/api/hello/{name}": {
+    "/api/health_check": {
       "get": {
-        "operationId": "SayHello",
+        "operationId": "HealthCheck",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/helloworldHelloReply"
+              "$ref": "#/definitions/confessionroomHealthCheckReply"
             }
           }
         },
-        "parameters": [
-          {
-            "name": "name",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
         "tags": [
-          "Greeter"
+          "Confession"
         ]
       }
     }
   },
   "definitions": {
-    "helloworldHelloReply": {
+    "confessionroomHealthCheckReply": {
       "type": "object",
       "properties": {
         "message": {

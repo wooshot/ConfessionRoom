@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+
+package confessionroom;
+
+service Confession {
+    rpc HealthCheck (Empty) returns (HealthCheckReply) {
+        option(google.api.http) = {
+            get: "/api/health_check",
+        };
+    }
+}
+
+message Empty {
+}
+
+message HealthCheckReply {
+    string message = 1;
+}
