@@ -15,10 +15,9 @@ services:
   swagger:
     image: swaggerapi/swagger-ui
     ports:
-      - "8080:8080"
+      - "8092:8080"
     volumes:
       - ./pb/:/api
     environment:
       SWAGGER_JSON: /api/confession.swagger.json
       BASE_URL: /swagger
-      API_URL: http://app:8090

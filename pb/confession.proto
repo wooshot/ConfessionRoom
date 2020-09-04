@@ -1,8 +1,24 @@
 syntax = "proto3";
 
 import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-swagger/options/annotations.proto";
 
 package confessionroom;
+
+option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
+    info: {
+		title: "Confession Room";
+		version: "1.0";
+		contact: {
+			name: "ConfessionRoom project";
+			url: "https://github.com/wooshot/ConfessionRoom";
+			email: "wooshot@gmail.com";
+		};
+    };
+    schemes: HTTP;
+    host: "localhost:8090";
+};
 
 service Confession {
     rpc HealthCheck (Empty) returns (HealthCheckReply) {
@@ -12,8 +28,7 @@ service Confession {
     }
 }
 
-message Empty {
-}
+message Empty{}
 
 message HealthCheckReply {
     string message = 1;

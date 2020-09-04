@@ -9,9 +9,8 @@ import (
 	"sync"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	pb "github.com/wooshot/grpcTest/pb"
+	pb "github.com/wooshot/ConfessionRoom/pb"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/runtime/protoiface"
 )
 
@@ -41,7 +40,7 @@ func (c *ConfessionServer) Start() {
 }
 
 func (c *ConfessionServer) startGRPC() error {
-	lis, err := net.Listen("tcp", "localhost:8080")
+	lis, err := net.Listen("tcp", "localhost:8091")
 	if err != nil {
 		return err
 	}
@@ -55,7 +54,6 @@ func restHandler(ctx context.Context, w http.ResponseWriter, resp protoiface.Mes
 	// allow cross domain AJAX requests
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, PATCH, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, api_key, Authorization")
 	return nil
 }
 
@@ -68,7 +66,7 @@ func (c *ConfessionServer) startREST() error {
 		runtime.WithForwardResponseOption(restHandler),
 	)
 	opts := []grpc.DialOption{grpc.WithInsecure()}
-	err := pb.RegisterConfessionHandlerFromEndpoint(ctx, mux, ":8080", opts)
+	err := pb.RegisterConfessionHandlerFromEndpoint(ctx, mux, ":8091", opts)
 	if err != nil {
 		return err
 	}
@@ -78,8 +76,6 @@ func (c *ConfessionServer) startREST() error {
 
 // HealthCheck ...
 func (c *ConfessionServer) HealthCheck(ctx context.Context, r *pb.Empty) (*pb.HealthCheckReply, error) {
-	header := metadata.Pairs("Access-Control-Allow-Origin", "*")
-	grpc.SendHeader(ctx, header)
 	return &pb.HealthCheckReply{
 		Message: fmt.Sprintf("Health check ok"),
 	}, nil
