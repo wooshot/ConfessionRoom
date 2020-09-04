@@ -15,6 +15,8 @@
 ## RUN server (docker)
     docker-compose up --build
 
-> api : http://localhost:8090
+> restful api : http://localhost:8090
 
-> swagger: http://localhost:8080
+> grpc api : http://localhost:8091
+
+> swagger: http://localhost:8082
