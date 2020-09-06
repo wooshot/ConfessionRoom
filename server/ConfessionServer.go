@@ -16,12 +16,13 @@ import (
 
 // ConfessionServer ...
 type ConfessionServer struct {
-	wg sync.WaitGroup
+	wg   sync.WaitGroup
+	room *ChatRoom
 }
 
 // New creates new server greeter
 func New() *ConfessionServer {
-	return &ConfessionServer{}
+	return &ConfessionServer{room: Create()}
 }
 
 // Start starts server
@@ -36,7 +37,13 @@ func (c *ConfessionServer) Start() {
 		log.Fatal(c.startREST())
 		c.wg.Done()
 	}()
+	c.wg.Add(1)
+	go func() {
+		log.Fatal(c.startCharServer())
+		c.wg.Done()
+	}()
 	c.wg.Wait()
+
 }
 
 func (c *ConfessionServer) startGRPC() error {
@@ -72,6 +79,23 @@ func (c *ConfessionServer) startREST() error {
 	}
 
 	return http.ListenAndServe(":8090", mux)
+}
+
+func (c *ConfessionServer) startCharServer() error {
+	listener, err := net.Listen("tcp", "localhost:8000")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go c.room.Broadcaster()
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		go c.room.HandleConn(conn)
+	}
 }
 
 // HealthCheck ...

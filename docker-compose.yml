@@ -10,6 +10,7 @@ services:
         - user={user_name}
         - personal_access_token=personal_access_token
     ports:
+      - "8000:8000"
       - "8090:8090"
     command: "./main"
   swagger:
