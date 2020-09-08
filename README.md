@@ -17,7 +17,7 @@
 ## Build client
     go build client/netcat.go
 
-    ./netcat
+    ./netcat {userName}
 
 ```
 chat api : {host}:8000

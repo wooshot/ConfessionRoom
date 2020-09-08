@@ -49,12 +49,16 @@ func (r *ChatRoom) HandleConn(conn net.Conn) {
 	ch := make(chan string)
 	go clientWriter(conn, ch)
 
-	who := conn.RemoteAddr().String()
-	ch <- "You are " + who
-	r.messages <- who + " has arrived"
+	ch <- "Wellcome"
 	r.entering <- ch
 
 	input := bufio.NewScanner(conn)
+	var who string
+	if input.Scan() {
+		who = input.Text()
+		r.messages <- who + " has arrived"
+	}
+
 	for input.Scan() {
 		r.messages <- who + ": " + input.Text()
 	}
