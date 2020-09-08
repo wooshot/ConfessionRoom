@@ -14,6 +14,10 @@
     go run main.go
 ## RUN server (docker)
     docker-compose up --build
+## Build client
+    go build client/netcat.go
+
+    ./netcat
 
 ```
 chat api : {host}:8000

@@ -82,7 +82,7 @@ func (c *ConfessionServer) startREST() error {
 }
 
 func (c *ConfessionServer) startCharServer() error {
-	listener, err := net.Listen("tcp", "localhost:8000")
+	listener, err := net.Listen("tcp", ":8000")
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -9,7 +9,7 @@ FROM golang:1.15.0 as builder
 # ARG personal_access_token
 # ENV personal_access_token=$personal_access_token
 
-WORKDIR $GOPATH/src/github.com/wooshot/grpcTest
+WORKDIR $GOPATH/src/github.com/wooshot/ConfessionRoom
 
 COPY . .
 
@@ -27,7 +27,7 @@ RUN GIT_TERMINAL_PROMPT=1 \
 # ---------------------------------------------------------------------
 #  The second stage container, for running the application
 # ---------------------------------------------------------------------
-FROM alpine:3.8
+FROM golang:alpine
 COPY --from=builder ./main /bin
 
 WORKDIR /bin
