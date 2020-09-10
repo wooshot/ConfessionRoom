@@ -4,25 +4,31 @@ import (
 	"bufio"
 	"fmt"
 	"net"
+	"time"
 )
 
+const timeout = 60 * time.Second
+
 // endpoint
-type ep chan<- string
+type ept struct {
+	out  chan<- string
+	name string
+}
 
 // ChatRoom struct
 type ChatRoom struct {
-	eps      map[ep]bool
-	entering chan ep
-	leaving  chan ep
+	epts     map[ept]bool
+	entering chan ept
+	leaving  chan ept
 	messages chan string // incoming messages
 }
 
 // Create return a ChatRoom instance
 func Create() *ChatRoom {
 	return &ChatRoom{
-		make(map[ep]bool),
-		make(chan ep),
-		make(chan ep),
+		make(map[ept]bool),
+		make(chan ept),
+		make(chan ept),
 		make(chan string),
 	}
 }
@@ -32,39 +38,57 @@ func (r *ChatRoom) Broadcaster() {
 	for {
 		select {
 		case msg := <-r.messages:
-			for ep := range r.eps {
-				ep <- msg
+			for ept := range r.epts {
+				select {
+				case ept.out <- msg:
+				default:
+					// Skip client if it's reading messages slowly.
+				}
 			}
-		case ep := <-r.entering:
-			r.eps[ep] = true
-		case ep := <-r.leaving:
-			delete(r.eps, ep)
-			close(ep)
+		case ept := <-r.entering:
+			r.epts[ept] = true
+			ept.out <- "Present:"
+			for e := range r.epts {
+				ept.out <- e.name
+			}
+		case ept := <-r.leaving:
+			delete(r.epts, ept)
+			close(ept.out)
 		}
 	}
 }
 
 // HandleConn Handle the connecting
 func (r *ChatRoom) HandleConn(conn net.Conn) {
-	ch := make(chan string)
-	go clientWriter(conn, ch)
-
-	ch <- "Wellcome"
-	r.entering <- ch
+	out := make(chan string, 10) // outgoing client messages
+	go clientWriter(conn, out)
+	in := make(chan string) // incoming client messages
+	go clientReader(conn, in)
 
 	input := bufio.NewScanner(conn)
 	var who string
 	if input.Scan() {
 		who = input.Text()
-		r.messages <- who + " has arrived"
+	}
+	ept := ept{out, who}
+	out <- "You are " + who
+	r.messages <- who + " has arrived"
+	r.entering <- ept
+	idle := time.NewTimer(timeout)
+
+Loop:
+	for {
+		select {
+		case msg := <-in:
+			r.messages <- who + ": " + msg
+			idle.Reset(timeout)
+		case <-idle.C:
+			conn.Close()
+			break Loop
+		}
 	}
 
-	for input.Scan() {
-		r.messages <- who + ": " + input.Text()
-	}
-	// NOTE: ignoring potential errors from input.Err()
-
-	r.leaving <- ch
+	r.leaving <- ept
 	r.messages <- who + " has left"
 	conn.Close()
 }
@@ -73,4 +97,12 @@ func clientWriter(conn net.Conn, ch <-chan string) {
 	for msg := range ch {
 		fmt.Fprintln(conn, msg) // NOTE: ignoring network errors
 	}
+}
+
+func clientReader(conn net.Conn, ch chan<- string) {
+	input := bufio.NewScanner(conn)
+	for input.Scan() {
+		ch <- input.Text()
+	}
+	// NOTE: ignoring potential errors from input.Err()
 }
