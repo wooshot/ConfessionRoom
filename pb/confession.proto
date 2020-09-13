@@ -21,11 +21,21 @@ option (grpc.gateway.protoc_gen_swagger.options.openapiv2_swagger) = {
 };
 
 service Confession {
-    rpc HealthCheck (Empty) returns (HealthCheckReply) {
+    rpc HealthCheck(Empty) returns (HealthCheckReply) {
         option(google.api.http) = {
             get: "/api/health_check",
         };
-    }
+    };
+    rpc CreateChatRoom(Empty) returns (UUID) {
+        option(google.api.http) = {
+            get: "/api/chatroom/create",
+        };
+    };
+    rpc CloseChatRoom(UUID) returns (Empty) {
+        option(google.api.http) = {
+            get: "/api/charroom/close",
+        };
+    };
 }
 
 message Empty{}
@@ -33,3 +43,8 @@ message Empty{}
 message HealthCheckReply {
     string message = 1;
 }
+
+message UUID {
+    string uuid = 1;
+}
+

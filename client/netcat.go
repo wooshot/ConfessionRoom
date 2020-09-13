@@ -11,12 +11,13 @@ import (
 
 func main() {
 	args := os.Args
-	var name string
+	var name, roomID string
 	if len(args) == 1 {
 		fmt.Println("Please give the name")
 		os.Exit(1)
 	}
 	name = args[1]
+	roomID = args[2]
 
 	conn, err := net.Dial("tcp", "localhost:8000")
 	if err != nil {
@@ -29,7 +30,7 @@ func main() {
 		done <- struct{}{} // signal the main goroutine
 	}()
 
-	enter := strings.NewReader(fmt.Sprintf("%s\n", name))
+	enter := strings.NewReader(fmt.Sprintf("%s:%s\n", name, roomID))
 	if _, err := io.Copy(conn, enter); err != nil {
 		log.Fatal(err)
 	}
