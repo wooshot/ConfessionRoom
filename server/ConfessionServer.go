@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	pb "github.com/wooshot/ConfessionRoom/pb"
 	"google.golang.org/grpc"
@@ -22,7 +23,7 @@ type ConfessionServer struct {
 
 // New creates new server greeter
 func New() *ConfessionServer {
-	return &ConfessionServer{room: Create()}
+	return &ConfessionServer{room: Create(uuid.New())}
 }
 
 // Start starts server

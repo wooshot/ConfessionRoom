@@ -8,6 +8,9 @@ clean:
 build:
 	go build -o $(TARGET) main.go
 
+run:
+	docker-compose up --build
+
 proto:
 	protoc -I/usr/local/include -I. \
 		-I${GOPATH}/src \
