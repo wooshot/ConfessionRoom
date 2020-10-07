@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"flag"
 	"io"
 	"log"
 	"net"
@@ -10,14 +11,8 @@ import (
 )
 
 func main() {
-	args := os.Args
-	var name, roomID string
-	if len(args) == 1 {
-		fmt.Println("Please give the name")
-		os.Exit(1)
-	}
-	name = args[1]
-	roomID = args[2]
+	userName := flag.String("name", "user", "User's name.")
+	roomId := flag.String("roomID", "00000000-0000-0000-0000-000000000000", "Chat room id (uuid)")
 
 	conn, err := net.Dial("tcp", "localhost:8000")
 	if err != nil {
@@ -30,7 +25,7 @@ func main() {
 		done <- struct{}{} // signal the main goroutine
 	}()
 
-	enter := strings.NewReader(fmt.Sprintf("%s:%s\n", name, roomID))
+	enter := strings.NewReader(fmt.Sprintf("%s:%s\n", *userName, *roomId))
 	if _, err := io.Copy(conn, enter); err != nil {
 		log.Fatal(err)
 	}

@@ -1,17 +1,24 @@
 version: "3.8"
 services:
-  app:
+  lb:
+    image: haproxy
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy
+  app1:
     build:
-      # context can/may/will be different per-project setup
       context: .
       dockerfile: Dockerfile
       target: builder
-      args:
-        - user={user_name}
-        - personal_access_token=personal_access_token
     ports:
-      - "8000:8000"
       - "8090:8090"
+    command: "./main"
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
     command: "./main"
   redis:
     image: redis:6.0.8-alpine
