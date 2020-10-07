@@ -1,4 +1,8 @@
 # Confession Room
+
+Confession is an experiment project.
+It leverage TCP connect to implement chat service. Just use goroutine and channel. And use Pub/Sub to achieve horizontal scaling.
+
 ## prerequire:
 ```
   golang 1.15
@@ -16,8 +20,8 @@
     docker-compose up --build
 ## Build client
     go build client/netcat.go
+    ./netcat {username} {roomID}
 
-    ./netcat {userName}
 
 ```
 chat api : {host}:8000
