@@ -21,22 +21,19 @@ type ChatRoom struct {
 	pubSub   *redis.PubSub
 	entering chan ept
 	leaving  chan ept
+	close    chan struct{}
 }
 
 // CreateRoom return a ChatRoom instance
 func CreateRoom(uuid uuid.UUID, rdb *redis.Client) *ChatRoom {
-	channels := []string{
-		fmt.Sprintf("%s-msg", uuid),
-		fmt.Sprintf("%s-entering", uuid),
-		fmt.Sprintf("%s-leaving", uuid),
-	}
-	ps := rdb.Subscribe(ctx, channels...)
+	ps := rdb.Subscribe(ctx, fmt.Sprintf("%s-msg", uuid))
 	return &ChatRoom{
 		uuid,
 		make(map[ept]bool),
 		ps,
 		make(chan ept),
 		make(chan ept),
+		make(chan struct{}),
 	}
 }
 
@@ -46,16 +43,9 @@ func (r *ChatRoom) PublishMsg(clt *redis.Client, msg string) {
 	clt.Publish(ctx, fmt.Sprintf("%s-msg", r.id.String()), msg)
 }
 
-// PublishEntering puslish entering to redis
-func (r *ChatRoom) PublishEntering(clt *redis.Client, msg string) {
-	msg = fmt.Sprintf("(%s) %s", r.id.String(), msg)
-	clt.Publish(ctx, fmt.Sprintf("%s-entering", r.id.String()), msg)
-}
-
-// PublishLeaving puslish leaving to redis
-func (r *ChatRoom) PublishLeaving(clt *redis.Client, msg string) {
-	msg = fmt.Sprintf("(%s) %s", r.id.String(), msg)
-	clt.Publish(ctx, fmt.Sprintf("%s-leaving", r.id.String()), msg)
+// Close close this room
+func (r *ChatRoom) Close() {
+	r.close <- struct{}{}
 }
 
 // Run select all channel ChatRoom received
@@ -64,6 +54,7 @@ Loop:
 	for {
 		select {
 		case msg, ok := <-r.pubSub.Channel():
+			log.Println(msg.Payload, msg.Channel)
 			if !ok {
 				log.Fatal("pubSub Channel failed")
 				break
@@ -78,13 +69,11 @@ Loop:
 			}
 		case ept := <-r.entering:
 			r.epts[ept] = true
-			ept.out <- "Present:"
-			for e := range r.epts {
-				ept.out <- e.name
-			}
 		case ept := <-r.leaving:
 			delete(r.epts, ept)
 			close(ept.out)
+		case <-r.close:
+			log.Println(r.id, " close the room")
 			if len(r.epts) == 0 {
 				break Loop
 			}

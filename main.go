@@ -3,6 +3,8 @@ package main
 import "github.com/wooshot/ConfessionRoom/server"
 
 func main() {
-	g := server.New()
+	c := server.NewConfessionServer()
+	g := server.NewConfessionServer()
+	c.Start()
 	g.Start()
 }

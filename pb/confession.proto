@@ -26,16 +26,6 @@ service Confession {
             get: "/api/health_check",
         };
     };
-    rpc CreateChatRoom(Empty) returns (UUID) {
-        option(google.api.http) = {
-            get: "/api/chatroom/create",
-        };
-    };
-    rpc CloseChatRoom(UUID) returns (Empty) {
-        option(google.api.http) = {
-            get: "/api/charroom/close",
-        };
-    };
 }
 
 message Empty{}
